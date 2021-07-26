@@ -1,32 +1,61 @@
 <template>
-	<view class="search-box">
+	<view>
 		
-		<uni-search-bar
-			@input="input"
-			:radius="100"
-			cancelButton="none"
-		></uni-search-bar>
-		
-	</view>
-	
-	<!-- 搜索建议列表  当搜索结果不为0的时候就显示-->
-	
-	<view class="sugg-list" >	
-		<!-- 这是出来的商品列表 -->
-		<view 
-			class="sugg-item"
-			v-for="(item, i) in searchResults"
-			:key="i"
-			@click="gotoDetail(item)"
-		>
-			<view class="goods-name">{{item.goods_name}}</view>
-			<uni-icons type="arrowright" size="16"></uni-icons>
+		<view class="search-box">
+			
+			<uni-search-bar
+				@input="input"
+				:radius="100"
+				cancelButton="none"
+			></uni-search-bar>
 			
 		</view>
 		
+		<!-- 搜索建议列表  当搜索结果不为0的时候就显示-->
+		<view 
+			class="sugg-list"
+			v-if="searchResults.length !== 0"
+		>
+		  <view 
+			class="sugg-item" 
+			v-for="(item, i) in searchResults" 
+			:key="i" 
+			@click="gotoDetail(item)"
+		  >
+			<view class="goods-name">{{item.goods_name}}</view>
+			<uni-icons type="arrowright" size="16"></uni-icons>
+		  </view>
+		</view>
+		
+		<!-- 显示搜索历史记录 -->
+		<view class="history-box" v-else>
+			
+			<!-- 标题 -->
+			<view class="history-title">
+				
+				<text>搜索历史</text>
+				<!-- 绑定清除历史记录的事件 -->
+				<uni-icons type="trash" size="17" @click="clean"></uni-icons>
+				
+			</view>
+			
+			<!-- 列表区域 -->
+			<view class="history-list">
+				
+				<uni-tag 
+					:text="item" 
+					v-for="(item, i) in histories"
+					:key="i"
+					@click="gotoGoodsList(item)"
+				></uni-tag>
+				
+			</view>
+			
+		</view>
+		
+		
 	</view>
-		
-		
+	
 </template>
 
 <script>
@@ -47,6 +76,9 @@
 			};
 		},
 		onLoad() {
+			
+			// 从缓存中获取到历史搜索记录
+			this.historyList = JSON.parse(uni.getStorageSync('kw' || '[]'))
 			
 		},
 		methods:{
@@ -117,6 +149,30 @@
 				// 对搜索历史数据，进行持久化存储
 				uni.setStorageSync('kw', JSON.stringify(this.historyList))
 				
+			},
+			clean(){
+				
+				// 先将变量赋值为空数组
+				this.historyList = []
+				// 将历史记录缓存清空
+				this.setStorageSync('kw', '[]')
+				
+			},
+			// 跳转到商品列表页面
+			gotoGoodsList(kw){
+				
+				uni.navigateTo({
+					url: '/subpkg/goods_list/goods_list?query=' + kw
+				})
+				
+			}
+		},
+		computed:{
+			// 每次将最新的搜索关键词放在数组的最前面
+			histories() {
+				
+				return [...this.historyList.reverse()]
+				
 			}
 			
 		}
@@ -124,5 +180,71 @@
 </script>
 
 <style lang="scss">
+
+.search-box{
+	
+	position: sticky;
+	top: 0;
+	z-index: 999;
+	
+}
+
+// 这是搜索商品列表的容器
+.sugg-list{
+	
+	padding: 0 5px;
+	
+	// 这是每一个商品列表的样式
+	.sugg-item{
+		
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		font-size: 12px;
+		padding: 13px 0;
+		border-bottom: 1px solid #efefef;
+		
+		// 商品名字样式, 单行文本省略样式
+		.goods-name{
+			
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			margin-left: 3px;
+			
+		}
+	}
+	
+}
+
+// 这是搜索历史的容器样式
+.history-box{
+	
+	padding: 0 5px;
+	
+	// 标题样式
+	.history-title{
+		
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		height: 40px;
+		font-size: 13px;
+		border-bottom: 1px solid #efefef;
+		
+	}
+	
+	// 列表样式
+	.history-list{
+		
+		// 图标样式
+		.uni-tag{
+			
+			
+		}
+		
+	}
+	
+}
 
 </style>
