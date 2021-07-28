@@ -1,11 +1,44 @@
 <template>
 	<view class="uni-numbox">
-		<view @click="_calcValue('minus')" class="uni-numbox__minus">
-			<text class="uni-numbox--text" :class="{ 'uni-numbox--disabled': inputValue <= min || disabled }">-</text>
+		<!-- 这是左边的减 -->
+		<view 
+			@click="_calcValue('minus')" 
+			class="uni-numbox__minus"
+		>	
+			<!-- 当 inputValue的值小于或者等于 min 或者 为 disalbed
+				就显示这个 uni-numbox--disabled 样式 
+				这个样式就是颜色为浅色，且按钮不能被点击
+			-->
+			<text 
+				class="uni-numbox--text" 
+				:class="{ 
+					'uni-numbox--disabled': 
+					inputValue <= min || disabled 
+				}"
+			>-</text>
 		</view>
-		<input :disabled="disabled" @blur="_onBlur" class="uni-numbox__value" type="number" v-model="inputValue" />
-		<view @click="_calcValue('plus')" class="uni-numbox__plus">
-			<text class="uni-numbox--text" :class="{ 'uni-numbox--disabled': inputValue >= max || disabled }">+</text>
+		<!-- 中间显示的数字，是个Input这样就可以自定义数量 -->
+		<!--  -->
+		<input 
+			:disabled="disabled" 
+			@blur="_onBlur" 
+			class="uni-numbox__value" 
+			type="number" 
+			v-model="inputValue" 
+		/>
+		<!-- 这是右边的加 -->
+		<view 
+			@click="_calcValue('plus')" 
+			class="uni-numbox__plus"
+		>
+		
+			<text 
+				class="uni-numbox--text" 
+				:class="{ 
+				'uni-numbox--disabled': 
+				inputValue >= max || disabled }"
+			>+</text>
+			
 		</view>
 	</view>
 </template>
@@ -48,6 +81,7 @@
 		},
 		data() {
 			return {
+				// input框默认值
 				inputValue: 0
 			};
 		},
@@ -65,53 +99,85 @@
 			this.inputValue = +this.value;
 		},
 		methods: {
+			// 这是计算 input 值的大小来
 			_calcValue(type) {
+				
 				if (this.disabled) {
+					
 					return;
+					
 				}
+				// 获取系数
 				const scale = this._getDecimalScale();
+				
+				// 让 inputValue 乘以这个系数
 				let value = this.inputValue * scale;
+				
 				let step = this.step * scale;
+				
 				if (type === "minus") {
+					
 					value -= step;
+					
 					if (value < (this.min * scale)) {
 						return;
 					}
+					
 					if (value > (this.max * scale)) {
 						value = this.max * scale
 					}
+					
 				} else if (type === "plus") {
+					
 					value += step;
+					
 					if (value > (this.max * scale)) {
 						return;
 					}
+					
 					if (value < (this.min * scale)) {
 						value = this.min * scale
 					}
+					
 				}
 
 				this.inputValue = String(value / scale);
+			
 			},
 			_getDecimalScale() {
 				let scale = 1;
 				// 浮点型
+				// 设置这个input 的值需要变化的系数
 				if (~~this.step !== this.step) {
 					scale = Math.pow(10, (this.step + "").split(".")[1].length);
 				}
 				return scale;
 			},
+			// 鼠标聚焦事件
 			_onBlur(event) {
+				
+				// 获取到input框的值
 				let value = event.detail.value;
+				
 				if (!value) {
 					// this.inputValue = 0;
 					return;
 				}
+				
 				value = +value;
+				
+				// 如果input的值 大于 100 就将最大值100 赋值给 input的值
+				// 如果input的值 小于 1 就将最小值1 赋值给 input的值
 				if (value > this.max) {
+					
 					value = this.max;
+					
 				} else if (value < this.min) {
+					
 					value = this.min;
+					
 				}
+				// 将最新的input值赋值给 inputValue变量
 				this.inputValue = value;
 			}
 		}

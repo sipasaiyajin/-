@@ -133,6 +133,7 @@
 		},
 		onLoad() {
 			
+			console.log('haha')
 			// 调用方法获取轮播图数据
 			this.getSwiperList()
 			this.getNavList()

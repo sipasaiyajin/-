@@ -52,6 +52,7 @@
 		<!-- 商品导航组件区域 -->
 		<view class="goods_nav">
 			
+			<!-- 使用这个商品按钮组 -->
 			<uni-goods-nav 
 				:fill="true" 
 				:options="options" 
@@ -68,6 +69,7 @@
 <script>
 		
 	import { getGoodsDetail } from '../../api/goodsDetail.js'
+	import { mapState, mapMutations, mapGetters } from 'vuex'
 	
 	export default {
 		data() {
@@ -82,6 +84,7 @@
 						infoColor: 'red'
 					
 					},
+					// info 就是购物车要显示的商品数量
 					{
 						icon: 'cart',
 						text: '购物车',
@@ -110,15 +113,44 @@
 				
 			}
 		},
+		// 监听最新的total商品总数,然后缓存
+		computed:{
+			
+			...mapState('m_cart', ''),
+			...mapGetters('m_cart', ['total'])
+			
+		},
+		watch: {
+		   // 对 getters 中的商品总数进行监听
+		   // 然后将 vuex 中的 最新的 total 总数
+		   // 赋值给 购物车的 info 属性
+		   // 定义 total 侦听器，指向一个配置对象
+		   total: {
+		      // handler 属性用来定义侦听器的 function 处理函数
+		      handler(newVal) {
+				  // 获取购物车按钮的配置对象
+		         const findResult = this.options.find(x => x.text === '购物车')
+		         // 如果存在购物车按钮就将新值给更新
+				 if (findResult) {
+		            findResult.info = newVal
+		         }
+		      },
+		      // immediate 属性用来声明此侦听器，是否在页面初次加载完毕后立即调用
+		      immediate: true
+		   }
+		},
 		onLoad(options){
 			
+			console.log(options)
 			// 从options中获取goods_id
 			const goods_id = options.goods_id
 			this.getGoodsDetail(goods_id)
 			
 		},
 		methods: {
-			
+			// 解构出 vuex 中的 m_cart 模块下的 
+			// addToCart 方法，用来添加商品 到 vuex 中的 state中保存
+			...mapMutations('m_cart', ['addToCart']),
 			async getGoodsDetail(goods_id){
 				
 				const {data: res} = await getGoodsDetail({goods_id:goods_id})
@@ -168,9 +200,9 @@
 						goods_price: this.goods_info.goods_price,
 						goods_count: 1,
 						goods_small_logo: this.goods_info.goods_small_logo,
-						goods_state: true
+						goods_state: false
 					}
-		
+		                 
 					// 调用 addToCart 方法
 				    this.addToCart(goods)
 					

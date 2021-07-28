@@ -9,15 +9,20 @@
 		  <image :src="goods.goods_small_logo || defaultPic" class="goods-pic"></image>
 		
 		</view>
+		
 		<!-- 右侧的盒子 -->
 		<view class="goods-item-right">
 			
 		  <!-- 商品的名字 -->
 		  <view class="goods-name">{{goods.goods_name}}</view>
 		  
+		  <!-- 商品价格 -->
 		  <view class="goods-info-box">
+			  
 			<view class="goods-price">￥{{goods.goods_price | tofixed}}</view>
+			<!-- 这是加减按钮组件 -->
 			<uni-number-box :min="1" :value="goods.goods_count" v-if="showNum" @change="numChangeHandler"></uni-number-box>
+		  
 		  </view>
 		  
 		</view>
@@ -68,16 +73,21 @@
 		methods: {
 			// 这是 radio 组件的 点击事件处理函数
 			radioClickHandler() {
+				
 				this.$emit('radio-change', {
 				  goods_id: this.goods.goods_id,
 				  goods_state: !this.goods.goods_state
 				})
+				
 			},
 			  // 监听到了 NumberBox 组件数量变化的事件
 			numChangeHandler(val) {
+				
 				this.$emit('num-change', {
+					
 				  goods_id: this.goods.goods_id,
-				  goods_count: +val
+				  goods_count: +val,
+				  
 				})
 			}
 		}

@@ -4,10 +4,12 @@
 		
 		<view class="goods-list">
 			
+			<!-- 遍历渲染商品列表数据 点击后就跳转到到该商品的商品详情页面-->
 			<view v-for="(goods, i) in goodsList"
 				:key="i"
 				@click="gotoDetail(goods)"
-			>
+			>	
+				<!-- 显示出商品的信息 -->
 				<my-goods :goods="goods"></my-goods>
 			
 			</view>
